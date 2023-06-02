@@ -1,0 +1,81 @@
+program->declaration-list
+declaration-list->declaration declaration-list'
+declaration-list'->declaration declaration-list'
+declaration-list'->#
+declaration->type-specifier ID D
+declaration->compound-stmt
+D->( params )
+D->tID'
+var-declaration->type-specifier ID tID'
+tID'->;
+tID'->[ NUM ] ;
+type-specifier->int
+type-specifier->void
+params->int ID param' plist'
+params->void P
+P->#
+P->ID param' plist'
+param-list->param plist'
+plist'->, param plist'
+plist'->#
+param->type-specifier ID param'
+param'->[ ]
+param'->#
+compound-stmt->{ local-declarations statement-list }
+local-declarations->var-declaration local-declarations
+local-declarations->#
+statement-list->statement statement-list
+statement-list->#
+statement->exp-stmt
+statement->compound-stmt
+statement->selection-stmt
+statement->iteration-stmt
+statement->return-stmt
+exp-stmt->exp ;
+exp-stmt->;
+selection-stmt->if ( exp ) statement sel'
+sel'->else statement
+sel'->#
+iteration-stmt->while ( exp ) statement
+return-stmt->return ret'
+ret'->;
+ret'->exp ;
+exp->( exp ) term' A' S'
+exp->NUM term' A' S'
+exp->ID E
+E->var' E'
+E->( args ) term' A' S'
+E'->= exp
+E'->term' A' S'
+var->ID var'
+var'->[ exp ]
+var'->#
+simple-exp->additive-exp S'
+S'->relop additive-exp
+S'->#
+relop-><
+relop-><=
+relop->>=
+relop->>
+relop->==
+relop->!=
+additive-exp->term A'
+A'->addop term A'
+A'->#
+addop->+
+addop->-
+term->factor term'
+term'->mulop factor term'
+term'->#
+mulop->*
+mulop->/
+factor->( exp )
+factor->ID F
+F->var'
+F->( args )
+factor->NUM
+args->arg-list
+args->#
+arg-list->exp arg'
+arg'->, exp arg'
+arg'->#

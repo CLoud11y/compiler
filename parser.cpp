@@ -86,7 +86,7 @@ void Parser::buildAST() {
         }
         string right = table[symbol][token.label];
         st_node.pop();
-        if (right != "#") {
+        if (right != EMPTY) {
             for (int i = 0; i < symbols[right].size(); i++) {
                 Node* child = new Node;
                 child->token.label = symbols[right][i];
@@ -155,12 +155,12 @@ void Parser::getTable() {
         for (string right : it.second) {
             unordered_set<string> uset;  // right 的first集
             getRightFirst(right, uset);
-            if (uset.find("#") != uset.end()) {
+            if (uset.find(EMPTY) != uset.end()) {
                 for (string symbol : Follow[left]) {
                     assert(table[left].find(symbol) == table[left].end());  // 确保没有冲突
                     table[left][symbol] = right;
                 }
-                uset.erase("#");
+                uset.erase(EMPTY);
             }
             for (string symbol : uset) {
                 assert(table[left].find(symbol) == table[left].end());  // 确保没有冲突
@@ -172,17 +172,17 @@ void Parser::getTable() {
 
 void Parser::getRightFirst(string right, unordered_set<string>& uset) {
     for (string symbol : symbols[right]) {
-        if (isVt(symbol) || symbol == "#") {
+        if (isVt(symbol) || symbol == EMPTY) {
             uset.insert(symbol);
             break;
         }
         assert(isVn(symbol));
         uset.insert(First[symbol].begin(), First[symbol].end());
-        if (uset.find("#") == uset.end())
+        if (uset.find(EMPTY) == uset.end())
             break;
         // 若其first集中有#且不是最后一个符号 则去掉#并继续看下一个symbol
         else if (symbol != symbols[right][symbols[right].size() - 1]) {
-            uset.erase("#");
+            uset.erase(EMPTY);
         }
     }
 }
@@ -213,13 +213,13 @@ bool Parser::isLL1() {
         // 比较temp集中各个集合是否满足LL1要求
         for (int i = 0; i < temp.size() - 1; i++) {
             for (int j = i + 1; j < temp.size(); j++) {
-                if (temp[i].find("#") == temp[i].end() && temp[j].find("#") == temp[j].end()) {
+                if (temp[i].find(EMPTY) == temp[i].end() && temp[j].find(EMPTY) == temp[j].end()) {
                     if (!isDisjoint(temp[i], temp[j]))
                         flag = 0;
-                } else if (temp[i].find("#") != temp[i].end() && temp[j].find("#") == temp[j].end()) {
+                } else if (temp[i].find(EMPTY) != temp[i].end() && temp[j].find(EMPTY) == temp[j].end()) {
                     if (!isDisjoint(Follow[left], temp[j]))
                         flag = 0;
-                } else if (temp[i].find("#") == temp[i].end() && temp[j].find("#") != temp[j].end()) {
+                } else if (temp[i].find(EMPTY) == temp[i].end() && temp[j].find(EMPTY) != temp[j].end()) {
                     if (!isDisjoint(Follow[left], temp[i]))
                         flag = 0;
                 } else
@@ -254,9 +254,9 @@ void Parser::getFirst(string left, unordered_set<string>& oneFirst) {
     unordered_set<string> right_set = split_productions[left];
     for (string right : right_set) {
         // 若产生式右部为# 直接添加进first集
-        if (right == "#") {
+        if (right == EMPTY) {
             // First[left].insert("#");
-            oneFirst.insert("#");
+            oneFirst.insert(EMPTY);
             continue;
         }
         // 顺序遍历产生式右部符号 若为终结符则加入first集并停止遍历
@@ -271,7 +271,7 @@ void Parser::getFirst(string left, unordered_set<string>& oneFirst) {
             getFirst(symbols[right][i], First[symbols[right][i]]);
             // 若其first集中有# 则还要继续看下一个symbol
             unordered_set<string> temp = First[symbols[right][i]];
-            auto it = temp.find("#");
+            auto it = temp.find(EMPTY);
             if (it != temp.end()) {
                 // 若所有symbol的first集都有# 则也要给此first集加上#
                 if (i != symbols[right].size() - 1) {
@@ -304,7 +304,7 @@ void Parser::getAllFollow() {
                     if (i == symbols[right].size() - 1 || flag == 1) {
                         Follow[symbols[right][i]].insert(Follow[left].begin(), Follow[left].end());
                         // 如果有B-># 则还要看是否将followA加入B前面符号的follow
-                        if (split_productions[symbols[right][i]].find("#") != split_productions[symbols[right][i]].end()) {
+                        if (split_productions[symbols[right][i]].find(EMPTY) != split_productions[symbols[right][i]].end()) {
                             flag = 1;
                         } else
                             flag = 0;
@@ -312,7 +312,7 @@ void Parser::getAllFollow() {
                     // 若i-1也为非终结符 将firsti 加入followi-1
                     if (i > 0 && isVn(symbols[right][i - 1])) {
                         Follow[symbols[right][i - 1]].insert(First[symbols[right][i]].begin(), First[symbols[right][i]].end());
-                        Follow[symbols[right][i - 1]].erase("#");
+                        Follow[symbols[right][i - 1]].erase(EMPTY);
                     }
                 } else if (isVt(symbols[right][i]) && i > 0) {
                     flag = 0;
@@ -346,7 +346,7 @@ void Parser::repeat() {
                             if (change > 0)
                                 repeat_flag = 1;
                             // 如果有B-># 则还要看是否将followA加入B前面符号的follow
-                            if (split_productions[symbols[right][i]].find("#") != split_productions[symbols[right][i]].end()) {
+                            if (split_productions[symbols[right][i]].find(EMPTY) != split_productions[symbols[right][i]].end()) {
                                 flag = 1;
                             } else
                                 break;
@@ -455,6 +455,9 @@ void Parser::run() {
 }
 
 int main() {
-    Parser* parser = new Parser();
+    string productions = "productions.txt";
+    string lex_result = "result/lex_result.txt";
+    string out = "result/parser_result.txt";
+    Parser* parser = new Parser(productions, lex_result, out);
     parser->run();
 }

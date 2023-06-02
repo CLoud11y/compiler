@@ -214,7 +214,7 @@ void analyse(FILE* fpin, FILE* fpout) {
 
 int main() {
     const char* in_path = "test.txt";
-    const char* out_path = "lex_result.txt";
+    const char* out_path = "result/lex_result.txt";
     FILE *fpin, *fpout;
     fpin = fopen(in_path, "r");
     fpout = fopen(out_path, "w");

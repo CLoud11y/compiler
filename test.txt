@@ -1,0 +1,38 @@
+void QuickSort(int arr[], int low, int high){
+    if (low < high){
+        int i;
+        int j;
+        int k;
+        i = low;
+        j = high;
+        k = arr[low];
+        while (i < j){
+            /*from right to left*/
+            while(arr[j] >= k)     {
+                j = j - 1;
+            }
+ 
+            if(i < j){
+                arr[i] = arr[j];
+                i = i + 1;
+            }
+            /*from left to right*/
+            while(arr[i] < k)      {
+                i = i + 1;
+            }
+ 
+            if(i < j){
+                arr[j] = arr[i];
+                j = j + 1;
+            }
+        } 
+        arr[i] = k;
+        /*
+        test
+        long
+        annotation
+        */
+        QuickSort(arr, low, i - 1);     
+        QuickSort(arr, i + 1, high);    
+    }
+}
